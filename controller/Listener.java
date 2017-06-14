@@ -28,8 +28,6 @@ public class Listener implements ActionListener {
     public Listener() {
         directoryChooser = new JFileChooser();
         targetsPath  = new ArrayList<>();
-        targetsPath.add(target1Path);
-        targetsPath.add(target2Path);
     }
 
     @Override
@@ -63,9 +61,12 @@ public class Listener implements ActionListener {
         } //transfer
         else {
             //validate user chooses
-            if(isValidTransfer())
-            //make transfer
-                System.out.println("valid");
+            if(isValidTransfer()){//make transfer
+                updateDestination();
+                for(String path : targetsPath)
+                    System.out.println(path);
+                transferFiles();
+            }
             else{//announce the user
                 System.out.println("not valid");
             }
@@ -108,7 +109,7 @@ public class Listener implements ActionListener {
 
         return true;
     }
-
+    /*check if the string isnt empty and can convert to Integer*/
     private boolean notEmptyAndNum(String str){
         if(str.isEmpty())
             return false;
@@ -121,4 +122,26 @@ public class Listener implements ActionListener {
         return true;
     }
     
+    private boolean transferFiles(){
+        createFolders();
+        return true;
+    }
+    
+    private void createFolders(){
+        
+    }
+    
+    private void updateDestination(){
+        FileMoverPanel panel = FileMoverPanel.getFileMoverPanel();
+        //update the destination members in the listener
+        target1Path += "\\" + panel.getFolder1Name();
+        target2Path += "\\" + panel.getFolder2Name();
+        //update gui targets
+        panel.setChosenTar1(target1Path);
+        panel.setChosenTar2(target2Path);
+        //add to targetsPath
+        targetsPath.clear();
+        targetsPath.add(target1Path);
+        targetsPath.add(target2Path);
+    }
 }
