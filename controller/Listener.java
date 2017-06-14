@@ -23,22 +23,23 @@ import view.FileMoverPanel;
 public class Listener implements ActionListener {
 
     private JFileChooser directoryChooser;
-    private String srcPath, target1Path, target2Path, fileType, volume , folder1Name = "" , folder2Name = "";
-    private ArrayList <String> targetsPath = null;
+    private String srcPath, target1Path, target2Path, fileType, volume, folder1Name = "", folder2Name = "";
+    private ArrayList<String> targetsPath = null;
     private File files[];
     private boolean validSrc = false, validTar1 = false, validTar2 = false, validVol = false, validType = false;
 
     public Listener() {
         directoryChooser = new JFileChooser();
-        targetsPath  = new ArrayList<>();
+        targetsPath = new ArrayList<>();
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
         //if transfer not pressed
-        if(!e.getSource().equals(FileMoverPanel.getFileMoverPanel().getTransferBtn()))
-        //choose source
+        if (!e.getSource().equals(FileMoverPanel.getFileMoverPanel().getTransferBtn())) //choose source
+        {
             this.chooseDirectory();
+        }
         //src btn
         if (e.getSource().equals(FileMoverPanel.getFileMoverPanel().getSrcBtn())) {
             srcPath = directoryChooser.getSelectedFile().getAbsolutePath();//get src path
@@ -64,12 +65,11 @@ public class Listener implements ActionListener {
         } //transfer
         else {
             //validate user chooses
-            if(isValidTransfer()){//make transfer
+            if (isValidTransfer()) {//make transfer
                 updateDestination();
                 createFolders();
                 transferFiles();
-            }
-            else{//announce the user
+            } else {//announce the user
                 System.out.println("not valid");
             }
         }
@@ -79,86 +79,96 @@ public class Listener implements ActionListener {
         directoryChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         directoryChooser.showOpenDialog(new JFrame());
     }
+
     /*check if the transfer is valid*/
-    private boolean isValidTransfer(){
+    private boolean isValidTransfer() {
         //check if src chosed and at least one target choosed
-        if(validSrc && (validTar1 || validTar2)){
+        if (validSrc && (validTar1 || validTar2)) {
             //check if input are fill
-            if(isValidInput())
+            if (isValidInput()) {
                 return true;
+            }
         }
         return false;
     }
-    
+
     /*check if input box are filled and valid*/
-    private boolean isValidInput(){
+    private boolean isValidInput() {
         FileMoverPanel fileMoverPanel = FileMoverPanel.getFileMoverPanel();
         //check volume
-        if(!notEmptyAndNum(fileMoverPanel.getVolume()))
+        if (!notEmptyAndNum(fileMoverPanel.getVolume())) {
             return false;
+        }
         //check folder1 fill
-        if(fileMoverPanel.getFolder1Name().isEmpty())
+        if (fileMoverPanel.getFolder1Name().isEmpty()) {
             return false;
+        }
         //check folder2 fill
-        if(fileMoverPanel.getFolder2Name().isEmpty())
+        if (fileMoverPanel.getFolder2Name().isEmpty()) {
             return false;
+        }
         //check type
-        if(fileMoverPanel.getType().isEmpty())
+        if (fileMoverPanel.getType().isEmpty()) {
             return false;
+        }
         //check offset
-        if(!notEmptyAndNum(fileMoverPanel.getOffset()))
+        if (!notEmptyAndNum(fileMoverPanel.getOffset())) {
             return false;
+        }
 
         return true;
     }
+
     /*check if the string isnt empty and can convert to Integer*/
-    private boolean notEmptyAndNum(String str){
-        if(str.isEmpty())
+    private boolean notEmptyAndNum(String str) {
+        if (str.isEmpty()) {
             return false;
-        try{
-            Integer.parseInt(str);
         }
-        catch(Exception e){
+        try {
+            Integer.parseInt(str);
+        } catch (Exception e) {
             return false;
         }
         return true;
     }
-    
-    private boolean transferFiles(){
+
+    private boolean transferFiles() {
         createFolders();//create the folders
-        File choosedFiles [] = getFilesToTransfer(files);//get the files that need to be transfered
-        try{
-            for(File file : choosedFiles){//copy file to the destinations
-                for(String toPath : targetsPath){
-                    Path to , from;
+        File choosedFiles[] = getFilesToTransfer(files);//get the files that need to be transfered
+        try {
+            for (File file : choosedFiles) {//copy file to the destinations
+                for (String toPath : targetsPath) {
+                    Path to, from;
                     from = Paths.get(srcPath + "\\" + file.getName());
                     to = Paths.get(toPath + "\\" + file.getName());
                     Files.copy(from, to);
                 }
             }
-        }
-        catch(Exception e){
+        } catch (Exception e) {
             return false;
         }
         return true;
     }
-    
-    private void createFolders(){
+
+    private void createFolders() {
         for (String targetPath : targetsPath) {
-                File f = new File(targetPath);
-                f.mkdir();
-            }
+            File f = new File(targetPath);
+            f.mkdir();
+        }
     }
+
     /*update destination in gui*/
-    private void updateDestination(){
+    private void updateDestination() {
         FileMoverPanel panel = FileMoverPanel.getFileMoverPanel();
         //update the destination members in the listener
-        if(!folder1Name.equals(panel.getFolder1Name()))
+        if (!folder1Name.equals(panel.getFolder1Name())) {
             folder1Name = panel.getFolder1Name();
             target1Path += "\\" + panel.getFolder1Name();
-        if(!folder2Name.equals(panel.getFolder2Name()))
+        }
+        if (!folder2Name.equals(panel.getFolder2Name())) {
             folder2Name = panel.getFolder2Name();
-        target2Path += "\\" + panel.getFolder2Name();      
+            target2Path += "\\" + panel.getFolder2Name();
+        }
         //update gui targets
         panel.setChosenTar1(target1Path);
         panel.setChosenTar2(target2Path);
@@ -167,17 +177,19 @@ public class Listener implements ActionListener {
         targetsPath.add(target1Path);
         targetsPath.add(target2Path);
     }
+
     /*select the files to transfer*/
-    private File [] getFilesToTransfer(File [] files){
+    private File[] getFilesToTransfer(File[] files) {
         String pattern = FileMoverPanel.getFileMoverPanel().getType();
-        ArrayList <File> file2Transfer = new ArrayList<>();
-        
-        for(File file : files){
+        ArrayList<File> file2Transfer = new ArrayList<>();
+
+        for (File file : files) {
             //check for pattern
-            if(file.getName().endsWith(pattern))
+            if (file.getName().endsWith(pattern)) {
                 file2Transfer.add(file);
+            }
         }
-        File arrFile [] = new File[file2Transfer.size()];
+        File arrFile[] = new File[file2Transfer.size()];
         return file2Transfer.toArray(arrFile);
     }
 }
