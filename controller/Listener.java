@@ -8,6 +8,9 @@ package controller;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -20,7 +23,7 @@ import view.FileMoverPanel;
 public class Listener implements ActionListener {
 
     private JFileChooser directoryChooser;
-    private String srcPath, target1Path, target2Path, fileType, volume;
+    private String srcPath, target1Path, target2Path, fileType, volume , folder1Name = "" , folder2Name = "";
     private ArrayList <String> targetsPath = null;
     private File files[];
     private boolean validSrc = false, validTar1 = false, validTar2 = false, validVol = false, validType = false;
@@ -63,8 +66,7 @@ public class Listener implements ActionListener {
             //validate user chooses
             if(isValidTransfer()){//make transfer
                 updateDestination();
-                for(String path : targetsPath)
-                    System.out.println(path);
+                createFolders();
                 transferFiles();
             }
             else{//announce the user
@@ -123,19 +125,40 @@ public class Listener implements ActionListener {
     }
     
     private boolean transferFiles(){
-        createFolders();
+        createFolders();//create the folders
+        File choosedFiles [] = getFilesToTransfer(files);//get the files that need to be transfered
+        try{
+            for(File file : choosedFiles){//copy file to the destinations
+                for(String toPath : targetsPath){
+                    Path to , from;
+                    from = Paths.get(srcPath + "\\" + file.getName());
+                    to = Paths.get(toPath + "\\" + file.getName());
+                    Files.copy(from, to);
+                }
+            }
+        }
+        catch(Exception e){
+            return false;
+        }
         return true;
     }
     
     private void createFolders(){
-        
+        for (String targetPath : targetsPath) {
+                File f = new File(targetPath);
+                f.mkdir();
+            }
     }
-    
+    /*update destination in gui*/
     private void updateDestination(){
         FileMoverPanel panel = FileMoverPanel.getFileMoverPanel();
         //update the destination members in the listener
-        target1Path += "\\" + panel.getFolder1Name();
-        target2Path += "\\" + panel.getFolder2Name();
+        if(!folder1Name.equals(panel.getFolder1Name()))
+            folder1Name = panel.getFolder1Name();
+            target1Path += "\\" + panel.getFolder1Name();
+        if(!folder2Name.equals(panel.getFolder2Name()))
+            folder2Name = panel.getFolder2Name();
+        target2Path += "\\" + panel.getFolder2Name();      
         //update gui targets
         panel.setChosenTar1(target1Path);
         panel.setChosenTar2(target2Path);
@@ -143,5 +166,18 @@ public class Listener implements ActionListener {
         targetsPath.clear();
         targetsPath.add(target1Path);
         targetsPath.add(target2Path);
+    }
+    /*select the files to transfer*/
+    private File [] getFilesToTransfer(File [] files){
+        String pattern = FileMoverPanel.getFileMoverPanel().getType();
+        ArrayList <File> file2Transfer = new ArrayList<>();
+        
+        for(File file : files){
+            //check for pattern
+            if(file.getName().endsWith(pattern))
+                file2Transfer.add(file);
+        }
+        File arrFile [] = new File[file2Transfer.size()];
+        return file2Transfer.toArray(arrFile);
     }
 }

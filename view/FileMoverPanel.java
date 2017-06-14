@@ -7,7 +7,6 @@ package view;
 
 import controller.Listener;
 import java.awt.BorderLayout;
-import java.awt.GridBagLayout;
 import java.awt.GridLayout;
 import javax.swing.*;
 
