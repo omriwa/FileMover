@@ -8,10 +8,17 @@ package controller;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributes;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import view.FileMoverPanel;
@@ -23,7 +30,7 @@ import view.FileMoverPanel;
 public class Listener implements ActionListener {
 
     private JFileChooser directoryChooser;
-    private String srcPath, target1Path, target2Path, fileType, volume, folder1Name = "", folder2Name = "";
+    private String srcPath, target1Path, target2Path, fileType, volume, folder1Name = "", folder2Name = "" , offset;
     private ArrayList<String> targetsPath = null;
     private File files[];
     private boolean validSrc = false, validTar1 = false, validTar2 = false, validVol = false, validType = false;
@@ -66,9 +73,12 @@ public class Listener implements ActionListener {
         else {
             //validate user chooses
             if (isValidTransfer()) {//make transfer
+                File choosedFiles[] = getFilesToTransfer(files);//get the files that need to be transfered
                 updateDestination();
                 createFolders();
-                transferFiles();
+                setInput();//set the input
+                transferFiles(choosedFiles);
+                setOffsetDate(choosedFiles);
             } else {//announce the user
                 System.out.println("not valid");
             }
@@ -132,22 +142,20 @@ public class Listener implements ActionListener {
         return true;
     }
 
-    private boolean transferFiles() {
-        createFolders();//create the folders
-        File choosedFiles[] = getFilesToTransfer(files);//get the files that need to be transfered
+    private void transferFiles(File choosedFiles[]) {
         try {
             for (File file : choosedFiles) {//copy file to the destinations
                 for (String toPath : targetsPath) {
                     Path to, from;
                     from = Paths.get(srcPath + "\\" + file.getName());
-                    to = Paths.get(toPath + "\\" + file.getName());
+                    String newName = getNewFileName(file);
+                    to = Paths.get(toPath + "\\" + newName + "." + fileType);
                     Files.copy(from, to);
                 }
             }
         } catch (Exception e) {
-            return false;
+            //announce user
         }
-        return true;
     }
 
     private void createFolders() {
@@ -191,5 +199,35 @@ public class Listener implements ActionListener {
         }
         File arrFile[] = new File[file2Transfer.size()];
         return file2Transfer.toArray(arrFile);
+    }
+
+    private String getNewFileName(File file) {
+        String format = "YYYYMMdd-hhmm";
+        String newFileName = "";
+        long date = 0;
+        SimpleDateFormat parser = null;
+        try {
+            BasicFileAttributes attr = Files.readAttributes(Paths.get(file.getAbsolutePath()), BasicFileAttributes.class);
+            date = attr.creationTime().to(TimeUnit.MILLISECONDS);
+            parser = new SimpleDateFormat(format);
+        } catch (IOException ex) {
+            Logger.getLogger(Listener.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        Date fileDate = new Date(date);
+        newFileName = parser.format(fileDate);
+        return newFileName;
+    }
+    
+    private void setOffsetDate(File files[]){
+        for(File file : files){
+            
+        }
+    }
+    
+    private void setInput(){
+        FileMoverPanel panel = FileMoverPanel.getFileMoverPanel();
+        fileType = panel.getType();
+        offset = panel.getOffset();
+        volume = panel.getVolume();
     }
 }
