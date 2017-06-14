@@ -123,4 +123,24 @@ public class FileMoverPanel extends JPanel {
     public JButton getTransferBtn() {
         return transferBtn;
     }
+    
+    public String getFolder1Name(){
+        return tar1Input.getText();
+    }
+    
+    public String getFolder2Name(){
+        return tar2Input.getText();
+    }
+    
+    public String getVolume(){
+        return volInput.getText();
+    }
+    
+    public String getOffset(){
+        return offsetInput.getText();
+    }
+    
+    public String getType(){
+        return fTypeInput.getText();
+    }
 }
