@@ -20,9 +20,8 @@ public class Listener implements ActionListener {
 
     private JFileChooser directoryChooser;
     private String srcPath, target1Path, target2Path, fileType, volume;
-    private File files [];
-    private boolean validSrc = false , validTar1 = false 
-                    , validTar2 = false , validVol = false , validType = false;
+    private File files[];
+    private boolean validSrc = false, validTar1 = false, validTar2 = false, validVol = false, validType = false;
 
     public Listener() {
         directoryChooser = new JFileChooser();
@@ -30,20 +29,24 @@ public class Listener implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        //choose source
+        this.chooseDirectory();
         //src btn
         if (e.getSource().equals(FileMoverPanel.getFileMoverPanel().getSrcBtn())) {
-            //choose source
-            files = directoryChooser.getSelectedFile().listFiles();//get files from directory
             srcPath = directoryChooser.getSelectedFile().getAbsolutePath();//get src path
+            files = directoryChooser.getSelectedFile().listFiles();//get files from directory
             //set src label in panel
-            FileMoverPanel.getFileMoverPanel().setSrcLbl(srcPath);
-
+            FileMoverPanel.getFileMoverPanel().setChosenSrc(srcPath);
         } //target 1 btn
         else if (e.getSource().equals(FileMoverPanel.getFileMoverPanel().getTarget1Btn())) {
             //choose target 1
+            target1Path = directoryChooser.getSelectedFile().getAbsolutePath();
+            FileMoverPanel.getFileMoverPanel().setChosenTar1(target1Path);
         } //target 2 btn
         else if (e.getSource().equals(FileMoverPanel.getFileMoverPanel().getTarget2Btn())) {
             //choose target 2
+            target2Path = directoryChooser.getSelectedFile().getAbsolutePath();
+            FileMoverPanel.getFileMoverPanel().setChosenTar2(target2Path);
         } //transfer
         else {
             //validate user chooses
@@ -51,7 +54,7 @@ public class Listener implements ActionListener {
         }
     }
 
-    private void chooseDirectory(String dir) {
+    private void chooseDirectory() {
         directoryChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         directoryChooser.showOpenDialog(new JFrame());
     }

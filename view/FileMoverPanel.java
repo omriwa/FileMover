@@ -16,15 +16,15 @@ import javax.swing.*;
  * @author omri
  */
 public class FileMoverPanel extends JPanel {
-    
-    private JButton srcBtn , target1Btn , target2Btn , transferBtn;
-    private JLabel srcLbl , trg1Lbl, trg2Lbl , volumeLbl , offsetLbl , fTypeLbl,
-            chosenTrg1 , chosenTrg2;
-    private JTextField tar1Input , tar2Input , fTypeInput , offsetInput , volInput;
-    private JPanel ePanel,wPanel , sPanel,innerSPanel;
+
+    private JButton srcBtn, target1Btn, target2Btn, transferBtn;
+    private JLabel chosenSrc, trg1Lbl, trg2Lbl, volumeLbl, offsetLbl, fTypeLbl,
+            chosenTrg1, chosenTrg2;
+    private JTextField tar1Input, tar2Input, fTypeInput, offsetInput, volInput;
+    private JPanel ePanel, wPanel, sPanel, innerSPanel;
     private static FileMoverPanel fileMoverPanel = null;
-    
-    private FileMoverPanel(){
+
+    private FileMoverPanel() {
         //panel creating
         sPanel = new JPanel();
         ePanel = new JPanel();
@@ -35,7 +35,7 @@ public class FileMoverPanel extends JPanel {
         target1Btn = new JButton("Target1 Folder");
         target2Btn = new JButton("Target2 Folder");
         transferBtn = new JButton("Transfer");
-        srcLbl = new JLabel("Source:");
+        chosenSrc = new JLabel("Source:");
         trg1Lbl = new JLabel("Target1:");
         trg2Lbl = new JLabel("Target2:");
         volumeLbl = new JLabel("Volume:");
@@ -51,7 +51,7 @@ public class FileMoverPanel extends JPanel {
         controller.Listener listener = new Listener();
         //setting boarderlayout to panels
         wPanel.setLayout(new GridLayout(3, 1));
-        ePanel.setLayout(new GridLayout(5,1));
+        ePanel.setLayout(new GridLayout(5, 1));
         innerSPanel.setLayout(new GridLayout(3, 1));
         sPanel.setLayout(new GridLayout(2, 1));
         //adding the memebers to panels
@@ -71,7 +71,7 @@ public class FileMoverPanel extends JPanel {
         ePanel.add(offsetLbl);
         ePanel.add(offsetInput);
         //innerSPanel adding
-        innerSPanel.add(srcLbl);
+        innerSPanel.add(chosenSrc);
         innerSPanel.add(chosenTrg1);
         innerSPanel.add(chosenTrg2);
         //sPanel adding
@@ -80,110 +80,32 @@ public class FileMoverPanel extends JPanel {
         //setting the border layout
         this.setLayout(new BorderLayout());
         //adding panels
-        this.add(wPanel , BorderLayout.WEST);
-        this.add(ePanel , BorderLayout.EAST);
-        this.add(sPanel , BorderLayout.SOUTH);
+        this.add(wPanel, BorderLayout.WEST);
+        this.add(ePanel, BorderLayout.EAST);
+        this.add(sPanel, BorderLayout.SOUTH);
         //adding listener
         srcBtn.addActionListener(listener);
         target1Btn.addActionListener(listener);
         target2Btn.addActionListener(listener);
         transferBtn.addActionListener(listener);
     }
-    
+
     /*singleton*/
-    public static FileMoverPanel getFileMoverPanel(){
-        if(fileMoverPanel == null){
+    public static FileMoverPanel getFileMoverPanel() {
+        if (fileMoverPanel == null) {
             fileMoverPanel = new FileMoverPanel();
         }
         return fileMoverPanel;
     }
-
-    public void setSrcBtn(JButton srcBtn) {
-        this.srcBtn = srcBtn;
+    
+    public void setChosenSrc(String txt){
+        chosenSrc.setText("Source:" + txt);
     }
-
-    public void setTarget1Btn(JButton target1Btn) {
-        this.target1Btn = target1Btn;
+    public void setChosenTar1(String txt){
+        chosenTrg1.setText("Target1:" + txt);
     }
-
-    public void setTarget2Btn(JButton target2Btn) {
-        this.target2Btn = target2Btn;
-    }
-
-    public void setTransferBtn(JButton transferBtn) {
-        this.transferBtn = transferBtn;
-    }
-
-    public void setSrcLbl(String txt) {
-        srcLbl.setText(txt);
-    }
-
-    public void setTrg1Lbl(String txt) {
-        trg1Lbl.setText(txt);
-    }
-
-    public void setTrg2Lbl(String txt) {
-        trg2Lbl.setText(txt);
-    }
-
-    public void setVolumeLbl(JLabel volumeLbl) {
-        this.volumeLbl = volumeLbl;
-    }
-
-    public void setOffsetLbl(JLabel offsetLbl) {
-        this.offsetLbl = offsetLbl;
-    }
-
-    public void setfTypeLbl(JLabel fTypeLbl) {
-        this.fTypeLbl = fTypeLbl;
-    }
-
-    public void setChosenTrg1(JLabel chosenTrg1) {
-        this.chosenTrg1 = chosenTrg1;
-    }
-
-    public void setChosenTrg2(JLabel chosenTrg2) {
-        this.chosenTrg2 = chosenTrg2;
-    }
-
-    public void setTar1Input(JTextField tar1Input) {
-        this.tar1Input = tar1Input;
-    }
-
-    public void setTar2Input(JTextField tar2Input) {
-        this.tar2Input = tar2Input;
-    }
-
-    public void setfTypeInput(JTextField fTypeInput) {
-        this.fTypeInput = fTypeInput;
-    }
-
-    public void setOffsetInput(JTextField offsetInput) {
-        this.offsetInput = offsetInput;
-    }
-
-    public void setVolInput(JTextField volInput) {
-        this.volInput = volInput;
-    }
-
-    public void setePanel(JPanel ePanel) {
-        this.ePanel = ePanel;
-    }
-
-    public void setwPanel(JPanel wPanel) {
-        this.wPanel = wPanel;
-    }
-
-    public void setsPanel(JPanel sPanel) {
-        this.sPanel = sPanel;
-    }
-
-    public void setInnerSPanel(JPanel innerSPanel) {
-        this.innerSPanel = innerSPanel;
-    }
-
-    public static void setFileMoverPanel(FileMoverPanel fileMoverPanel) {
-        FileMoverPanel.fileMoverPanel = fileMoverPanel;
+    public void setChosenTar2(String txt){
+        chosenTrg2.setText("Target2:" + txt);
     }
 
     public JButton getSrcBtn() {
@@ -193,7 +115,7 @@ public class FileMoverPanel extends JPanel {
     public JButton getTarget1Btn() {
         return target1Btn;
     }
-
+    
     public JButton getTarget2Btn() {
         return target2Btn;
     }
@@ -201,73 +123,4 @@ public class FileMoverPanel extends JPanel {
     public JButton getTransferBtn() {
         return transferBtn;
     }
-
-    public JLabel getSrcLbl() {
-        return srcLbl;
-    }
-
-    public JLabel getTrg1Lbl() {
-        return trg1Lbl;
-    }
-
-    public JLabel getTrg2Lbl() {
-        return trg2Lbl;
-    }
-
-    public JLabel getVolumeLbl() {
-        return volumeLbl;
-    }
-
-    public JLabel getOffsetLbl() {
-        return offsetLbl;
-    }
-
-    public JLabel getfTypeLbl() {
-        return fTypeLbl;
-    }
-
-    public JLabel getChosenTrg1() {
-        return chosenTrg1;
-    }
-
-    public JLabel getChosenTrg2() {
-        return chosenTrg2;
-    }
-
-    public JTextField getTar1Input() {
-        return tar1Input;
-    }
-
-    public JTextField getTar2Input() {
-        return tar2Input;
-    }
-
-    public JTextField getfTypeInput() {
-        return fTypeInput;
-    }
-
-    public JTextField getOffsetInput() {
-        return offsetInput;
-    }
-
-    public JTextField getVolInput() {
-        return volInput;
-    }
-
-    public JPanel getePanel() {
-        return ePanel;
-    }
-
-    public JPanel getwPanel() {
-        return wPanel;
-    }
-
-    public JPanel getsPanel() {
-        return sPanel;
-    }
-
-    public JPanel getInnerSPanel() {
-        return innerSPanel;
-    }
-   
 }
