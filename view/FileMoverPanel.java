@@ -37,7 +37,7 @@ public class FileMoverPanel extends JPanel {
         chosenSrc = new JLabel("Source:");
         trg1Lbl = new JLabel("Target1:");
         trg2Lbl = new JLabel("Target2:");
-        volumeLbl = new JLabel("Volume:");
+        volumeLbl = new JLabel("Volume in kb:");
         fTypeLbl = new JLabel("files to copy:");
         offsetLbl = new JLabel("Offset:");
         chosenTrg1 = new JLabel("target1:");
@@ -141,5 +141,9 @@ public class FileMoverPanel extends JPanel {
     
     public String getType(){
         return fTypeInput.getText();
+    }
+
+    public void setVolumeInput(String size) {
+        volInput.setText(size);
     }
 }

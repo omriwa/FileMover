@@ -12,7 +12,9 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.attribute.BasicFileAttributeView;
 import java.nio.file.attribute.BasicFileAttributes;
+import java.nio.file.attribute.FileTime;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -21,6 +23,7 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import view.FileMoverPanel;
 
 /**
@@ -30,7 +33,7 @@ import view.FileMoverPanel;
 public class Listener implements ActionListener {
 
     private JFileChooser directoryChooser;
-    private String srcPath, target1Path, target2Path, fileType, volume, folder1Name = "", folder2Name = "" , offset;
+    private String srcPath, target1Path, target2Path, fileType, volume, folder1Name = "", folder2Name = "", offset;
     private ArrayList<String> targetsPath = null;
     private File files[];
     private boolean validSrc = false, validTar1 = false, validTar2 = false, validVol = false, validType = false;
@@ -42,15 +45,18 @@ public class Listener implements ActionListener {
 
     @Override
     public void actionPerformed(ActionEvent e) {
+        boolean dirChosen = false;
         //if transfer not pressed
         if (!e.getSource().equals(FileMoverPanel.getFileMoverPanel().getTransferBtn())) //choose source
         {
-            this.chooseDirectory();
+            if(!chooseDirectory())
+                return;
         }
         //src btn
         if (e.getSource().equals(FileMoverPanel.getFileMoverPanel().getSrcBtn())) {
             srcPath = directoryChooser.getSelectedFile().getAbsolutePath();//get src path
             files = directoryChooser.getSelectedFile().listFiles();//get files from directory
+            setVolumeGui();//set the volume of files in gui
             //set src label in panel
             FileMoverPanel.getFileMoverPanel().setChosenSrc(srcPath);
             //valid the choose of src
@@ -74,6 +80,8 @@ public class Listener implements ActionListener {
             //validate user chooses
             if (isValidTransfer()) {//make transfer
                 File choosedFiles[] = getFilesToTransfer(files);//get the files that need to be transfered
+                setVolumeGui();//set the volume of files in gui
+                changeVol();//ask the user for change the volume
                 updateDestination();
                 createFolders();
                 setInput();//set the input
@@ -85,9 +93,13 @@ public class Listener implements ActionListener {
         }
     }
 
-    private void chooseDirectory() {
+    private boolean chooseDirectory() {
         directoryChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-        directoryChooser.showOpenDialog(new JFrame());
+        int result = directoryChooser.showOpenDialog(new JFrame());
+        if(result == JFileChooser.APPROVE_OPTION)
+            return true;
+        else
+            return false;
     }
 
     /*check if the transfer is valid*/
@@ -217,17 +229,67 @@ public class Listener implements ActionListener {
         newFileName = parser.format(fileDate);
         return newFileName;
     }
-    
-    private void setOffsetDate(File files[]){
-        for(File file : files){
-            
+
+    private void setOffsetDate(File files[]) {
+        for (File file : files) {
+
         }
     }
-    
-    private void setInput(){
+
+    /*set the input of the user to the right variables*/
+    private void setInput() {
         FileMoverPanel panel = FileMoverPanel.getFileMoverPanel();
         fileType = panel.getType();
         offset = panel.getOffset();
         volume = panel.getVolume();
+    }
+
+    /*set the volume of the source in gui*/
+    private void setVolumeGui() {
+        int size = 0;
+        for (File f : files) {//summing the volume of each file
+            size += f.length();
+        }
+        FileMoverPanel.getFileMoverPanel().setVolumeInput(Integer.toString(size / 10));
+    }
+
+    /*change the input of the volume*/
+    private void changeVol() {
+        String volume = "";
+        volume = JOptionPane.showInputDialog(new JFrame(), "for change the volume enter a number else press ok");
+        if (!volume.isEmpty()) {
+            FileMoverPanel.getFileMoverPanel().setVolumeInput(volume);
+        }
+    }
+
+    public void setOffsetDate() {
+        File choosedFiles [] = getFilesToTransfer(files);
+        //changing the offset of the created time of the file
+        for (int i = 0 ; i < choosedFiles.length ; i++) {
+            //get the source Files
+            if(choosedFiles[i].getName().equals(files[i].getName())){
+                try {
+                    setFileCreationDate(files[i].getAbsolutePath());
+                } catch (IOException ex) {
+                    Logger.getLogger(Listener.class.getName()).log(Level.SEVERE, null, ex);
+                }
+            }
+        }
+    }
+
+    private void setFileCreationDate(String filePath) throws IOException {
+        BasicFileAttributeView attributes = Files.getFileAttributeView(Paths.get(filePath), BasicFileAttributeView.class);
+        FileTime time = FileTime.fromMillis(getFileCreateTime(filePath) - ((10^6) * Integer.parseInt(offset)));
+        attributes.setTimes(time, time, time);
+    }
+    
+    private Long getFileCreateTime(String url){
+        BasicFileAttributes attr = null;
+        try {
+            attr = Files.readAttributes(Paths.get(url), BasicFileAttributes.class);
+        } catch (IOException ex) {
+            Logger.getLogger(Listener.class.getName()).log(Level.SEVERE, null, ex);
+        }
+        return attr.creationTime().toMillis();
     }
 }
