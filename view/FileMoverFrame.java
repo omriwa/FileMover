@@ -19,7 +19,7 @@ public class FileMoverFrame extends JFrame{
     private int height = 0;
     private final String windowLbl = "COPY/RENAME FILE UTILITY";
 
-    private FileMoverFrame() {
+    public FileMoverFrame() {
         this.setScreenSize();
         this.setSize(width, height);
         this.setTitle(windowLbl);
