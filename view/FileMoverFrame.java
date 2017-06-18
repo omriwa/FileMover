@@ -19,7 +19,7 @@ public class FileMoverFrame extends JFrame{
     private int height = 0;
     private final String windowLbl = "COPY/RENAME FILE UTILITY";
 
-    public FileMoverFrame() {
+    private FileMoverFrame() {
         this.setScreenSize();
         this.setSize(width, height);
         this.setTitle(windowLbl);
@@ -27,6 +27,8 @@ public class FileMoverFrame extends JFrame{
         this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         this.setVisible(true);
     }
+    
+    
     /*set the screen size 1/3 and return array of int that first element is width and the other is height*/
     private void setScreenSize() {
         Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
@@ -40,5 +42,4 @@ public class FileMoverFrame extends JFrame{
     public static void main(String[] args) {
          FileMoverFrame f = new FileMoverFrame();
     }
-
 }

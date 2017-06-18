@@ -13,17 +13,15 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.attribute.BasicFileAttributeView;
-import java.nio.file.attribute.BasicFileAttributes;
 import java.nio.file.attribute.FileTime;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
+import model.TransferFile;
 import view.FileMoverPanel;
 
 /**
@@ -36,11 +34,16 @@ public class Listener implements ActionListener {
     private String srcPath, target1Path, target2Path, fileType, volume, folder1Name = "", folder2Name = "", offset;
     private ArrayList<String> targetsPath = null;
     private File files[];
-    private boolean validSrc = false, validTar1 = false, validTar2 = false, validVol = false, validType = false;
+    private boolean validSrc = false, validTar1 = false, validTar2 = false, validVol = false;
+    private ArrayList<TransferFile> transferFilesInfo = null;
+    private final boolean folderCreationFlags [] = new boolean[2];
 
     public Listener() {
         directoryChooser = new JFileChooser();
         targetsPath = new ArrayList<>();
+        transferFilesInfo = new ArrayList<TransferFile>();
+        folderCreationFlags [0] = false;
+        folderCreationFlags [1] = false;
     }
 
     @Override
@@ -49,8 +52,9 @@ public class Listener implements ActionListener {
         //if transfer not pressed
         if (!e.getSource().equals(FileMoverPanel.getFileMoverPanel().getTransferBtn())) //choose source
         {
-            if(!chooseDirectory())
+            if (!chooseDirectory()) {
                 return;
+            }
         }
         //src btn
         if (e.getSource().equals(FileMoverPanel.getFileMoverPanel().getSrcBtn())) {
@@ -79,14 +83,25 @@ public class Listener implements ActionListener {
         else {
             //validate user chooses
             if (isValidTransfer()) {//make transfer
-                File choosedFiles[] = getFilesToTransfer(files);//get the files that need to be transfered
-                setVolumeGui();//set the volume of files in gui
-                changeVol();//ask the user for change the volume
-                updateDestination();
-                createFolders();
-                setInput();//set the input
-                transferFiles(choosedFiles);
-                setOffsetDate(choosedFiles);
+                try {
+                    File choosedFiles[] = getFilesToTransfer(files);//get the files that need to be transfered
+                    TransferFile.initFileArrInfo(files);//
+                    setVolumeGui();//set the volume of files in gui
+                    changeVol();//ask the user for change the volume
+                    int userResult = JOptionPane.showConfirmDialog(new JFrame(), "procced?");
+                    updateDestination();
+                    setInput();//set the input
+                    if (userResult == JOptionPane.OK_OPTION) {
+                        createFolders();
+                        transferFiles(choosedFiles, TransferFile.getTransferFilesInfo());
+                        setFilesDate(TransferFile.getTransferFilesInfo());
+                        userResult = JOptionPane.showConfirmDialog(new JFrame(), "Transfered successfuly , delete origin files?");
+                        if(userResult == JOptionPane.OK_OPTION)
+                            deletOriginFiles();
+                    }
+                } catch (Exception ez) {
+
+                }
             } else {//announce the user
                 System.out.println("not valid");
             }
@@ -96,10 +111,11 @@ public class Listener implements ActionListener {
     private boolean chooseDirectory() {
         directoryChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
         int result = directoryChooser.showOpenDialog(new JFrame());
-        if(result == JFileChooser.APPROVE_OPTION)
+        if (result == JFileChooser.APPROVE_OPTION) {
             return true;
-        else
+        } else {
             return false;
+        }
     }
 
     /*check if the transfer is valid*/
@@ -117,20 +133,12 @@ public class Listener implements ActionListener {
     /*check if input box are filled and valid*/
     private boolean isValidInput() {
         FileMoverPanel fileMoverPanel = FileMoverPanel.getFileMoverPanel();
-        //check volume
-        if (!notEmptyAndNum(fileMoverPanel.getVolume())) {
-            return false;
-        }
         //check folder1 fill
-        if (fileMoverPanel.getFolder1Name().isEmpty()) {
+        if (fileMoverPanel.getFolder1Name().isEmpty() && validTar1) {
             return false;
         }
         //check folder2 fill
-        if (fileMoverPanel.getFolder2Name().isEmpty()) {
-            return false;
-        }
-        //check type
-        if (fileMoverPanel.getType().isEmpty()) {
+        if (fileMoverPanel.getFolder2Name().isEmpty() && validTar2) {
             return false;
         }
         //check offset
@@ -154,26 +162,29 @@ public class Listener implements ActionListener {
         return true;
     }
 
-    private void transferFiles(File choosedFiles[]) {
-        try {
-            for (File file : choosedFiles) {//copy file to the destinations
-                for (String toPath : targetsPath) {
-                    Path to, from;
-                    from = Paths.get(srcPath + "\\" + file.getName());
-                    String newName = getNewFileName(file);
+    private void transferFiles(File choosedFiles[], ArrayList<TransferFile> filesInfo) throws IOException {
+        for (int i = 0; i < choosedFiles.length; i++) {//copy file to the destinations
+            for (String toPath : targetsPath) {
+                Path to = null, from;
+                from = Paths.get(srcPath + "\\" + choosedFiles[i].getName());
+                String newName = filesInfo.get(i).getName() 
+                        + "_" + volume + 
+                        "_" + getFileName(choosedFiles[i].getName());
+                if(fileType.length() == 0)//regular transfer
+                    to = Paths.get(toPath + "\\" + newName + getFileEnding(choosedFiles[i]));
+                else
                     to = Paths.get(toPath + "\\" + newName + "." + fileType);
-                    Files.copy(from, to);
-                }
+                Files.copy(from, to);
             }
-        } catch (Exception e) {
-            //announce user
         }
     }
 
     private void createFolders() {
-        for (String targetPath : targetsPath) {
-            File f = new File(targetPath);
-            f.mkdir();
+        for (int i = 0; i < targetsPath.size(); i++) {
+            if(folderCreationFlags[i]){
+                File f = new File(targetsPath.get(i));
+                f.mkdir();
+            }
         }
     }
 
@@ -184,11 +195,17 @@ public class Listener implements ActionListener {
         if (!folder1Name.equals(panel.getFolder1Name())) {
             folder1Name = panel.getFolder1Name();
             target1Path += "\\" + panel.getFolder1Name();
+            folderCreationFlags[0] = true;
         }
+        else
+            folderCreationFlags[0] = false;
         if (!folder2Name.equals(panel.getFolder2Name())) {
             folder2Name = panel.getFolder2Name();
             target2Path += "\\" + panel.getFolder2Name();
+            folderCreationFlags[1] = true;
         }
+        else
+            folderCreationFlags[1] = false;
         //update gui targets
         panel.setChosenTar1(target1Path);
         panel.setChosenTar2(target2Path);
@@ -204,36 +221,10 @@ public class Listener implements ActionListener {
         ArrayList<File> file2Transfer = new ArrayList<>();
 
         for (File file : files) {
-            //check for pattern
-            if (file.getName().endsWith(pattern)) {
-                file2Transfer.add(file);
-            }
+            file2Transfer.add(file);
         }
         File arrFile[] = new File[file2Transfer.size()];
         return file2Transfer.toArray(arrFile);
-    }
-
-    private String getNewFileName(File file) {
-        String format = "YYYYMMdd-hhmm";
-        String newFileName = "";
-        long date = 0;
-        SimpleDateFormat parser = null;
-        try {
-            BasicFileAttributes attr = Files.readAttributes(Paths.get(file.getAbsolutePath()), BasicFileAttributes.class);
-            date = attr.creationTime().to(TimeUnit.MILLISECONDS);
-            parser = new SimpleDateFormat(format);
-        } catch (IOException ex) {
-            Logger.getLogger(Listener.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        Date fileDate = new Date(date);
-        newFileName = parser.format(fileDate);
-        return newFileName;
-    }
-
-    private void setOffsetDate(File files[]) {
-        for (File file : files) {
-
-        }
     }
 
     /*set the input of the user to the right variables*/
@@ -245,12 +236,8 @@ public class Listener implements ActionListener {
     }
 
     /*set the volume of the source in gui*/
-    private void setVolumeGui() {
-        int size = 0;
-        for (File f : files) {//summing the volume of each file
-            size += f.length();
-        }
-        FileMoverPanel.getFileMoverPanel().setVolumeInput(Integer.toString(size / 10));
+    private void setVolumeGui() {      
+        FileMoverPanel.getFileMoverPanel().setVolumeInput(volume);
     }
 
     /*change the input of the volume*/
@@ -262,34 +249,54 @@ public class Listener implements ActionListener {
         }
     }
 
-    public void setOffsetDate() {
-        File choosedFiles [] = getFilesToTransfer(files);
-        //changing the offset of the created time of the file
-        for (int i = 0 ; i < choosedFiles.length ; i++) {
-            //get the source Files
-            if(choosedFiles[i].getName().equals(files[i].getName())){
-                try {
-                    setFileCreationDate(files[i].getAbsolutePath());
-                } catch (IOException ex) {
-                    Logger.getLogger(Listener.class.getName()).log(Level.SEVERE, null, ex);
+    private void setFileCreationDate(File newF, Date createdTime) throws IOException {
+        BasicFileAttributeView attributes = Files.getFileAttributeView(Paths.get(newF.getAbsolutePath()), BasicFileAttributeView.class);
+        FileTime newFileTime = FileTime.fromMillis(createdTime.getTime());
+        attributes.setTimes(newFileTime, newFileTime, newFileTime);
+
+    }
+
+    /*getting the file ending*/
+    private String getFileEnding(File f) {
+        String ending = "";
+        int dotIndex;
+        for (dotIndex = f.getName().length() - 1; dotIndex > 0; dotIndex--) {
+            if (f.getName().charAt(dotIndex) == '.') {
+                break;
+            }
+        }
+        ending = f.getName().substring(dotIndex);
+        return ending;
+    }
+
+    private void setFilesDate(ArrayList<TransferFile> transferFilesInfo) throws Exception {
+        for (String targetPath : targetsPath) {
+            if (targetPath != null) {
+                File dir = new File(targetPath);
+                File dirFiles[] = dir.listFiles();
+                for (int i = 0; i < transferFilesInfo.size(); i++) {
+                    setFileCreationDate(dirFiles[i], transferFilesInfo.get(i).getCreateTime());
                 }
             }
         }
     }
-
-    private void setFileCreationDate(String filePath) throws IOException {
-        BasicFileAttributeView attributes = Files.getFileAttributeView(Paths.get(filePath), BasicFileAttributeView.class);
-        FileTime time = FileTime.fromMillis(getFileCreateTime(filePath) - ((10^6) * Integer.parseInt(offset)));
-        attributes.setTimes(time, time, time);
+    
+    private void deletOriginFiles(){
+        for(int i = 0 ; i < files.length ; i++)
+            try {
+                Files.delete(Paths.get(files[i].getAbsolutePath()));
+            } catch (IOException ex) {
+                Logger.getLogger(Listener.class.getName()).log(Level.SEVERE, null, ex);
+            }
     }
     
-    private Long getFileCreateTime(String url){
-        BasicFileAttributes attr = null;
-        try {
-            attr = Files.readAttributes(Paths.get(url), BasicFileAttributes.class);
-        } catch (IOException ex) {
-            Logger.getLogger(Listener.class.getName()).log(Level.SEVERE, null, ex);
-        }
-        return attr.creationTime().toMillis();
+    private String getFileName(String name){
+        String output = "";
+        for(int i = 0 ; i < name.length() ; i++)
+            if(name.charAt(i) == '.'){
+                output = name.substring(0, i);
+                break;
+            }
+        return output;
     }
 }
