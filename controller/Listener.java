@@ -167,14 +167,14 @@ public class Listener implements ActionListener {
         for (int i = 0; i < choosedFiles.length; i++) {//copy file to the destinations
             for (String toPath : targetsPath) {
                 Path to = null, from;
-                from = Paths.get(srcPath + "\\" + choosedFiles[i].getName());
+                from = Paths.get(srcPath + "/" + choosedFiles[i].getName());
                 String newName = filesInfo.get(i).getName() 
                         + "_" + volume + 
                         "_" + getFileName(choosedFiles[i].getName());
                 if(fileType.length() == 0)//regular transfer
-                    to = Paths.get(toPath + "\\" + newName + getFileEnding(choosedFiles[i]));
+                    to = Paths.get(toPath + "/" + newName + getFileEnding(choosedFiles[i]));
                 else
-                    to = Paths.get(toPath + "\\" + newName + "." + fileType);
+                    to = Paths.get(toPath + "/" + newName + "." + fileType);
                 Files.copy(from, to);
             }
         }
@@ -195,14 +195,14 @@ public class Listener implements ActionListener {
         //update the destination members in the listener
         if (!folder1Name.equals(panel.getFolder1Name())) {
             folder1Name = panel.getFolder1Name();
-            target1Path += "\\" + panel.getFolder1Name();
+            target1Path += "/" + panel.getFolder1Name();
             folderCreationFlags[0] = true;
         }
         else
             folderCreationFlags[0] = false;
         if (!folder2Name.equals(panel.getFolder2Name())) {
             folder2Name = panel.getFolder2Name();
-            target2Path += "\\" + panel.getFolder2Name();
+            target2Path += "/" + panel.getFolder2Name();
             folderCreationFlags[1] = true;
         }
         else
@@ -244,7 +244,7 @@ public class Listener implements ActionListener {
     /*change the input of the volume*/
     private void changeVol() {
         String volume = "";
-        volume = JOptionPane.showInputDialog(new JFrame(), "for change the volume enter a number else press ok");
+        volume = JOptionPane.showInputDialog(new JFrame(), "for change the volume enter a volume else press ok");
         if (!volume.isEmpty()) {
             FileMoverPanel.getFileMoverPanel().setVolumeInput(volume);
         }
