@@ -1,5 +1,7 @@
 package model;
 
+
+
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -7,6 +9,7 @@ package model;
  */
 
 
+//import view.FileMoverPanel;
 import view.FileMoverPanel;
 import java.io.File;
 import java.io.IOException;
@@ -18,7 +21,7 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
-import controller.Listener;
+//import controller.Listener;
 
 /**
  *

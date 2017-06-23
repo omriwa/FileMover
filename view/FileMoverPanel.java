@@ -2,6 +2,8 @@ package view;
 
 
 
+
+
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
@@ -52,7 +54,7 @@ public class FileMoverPanel extends JPanel {
         offsetInput = new JTextField();
         volInput = new JTextField();
         fTypeInput = new JTextField();
-        controller.Listener listener = new Listener();
+        Listener listener = new Listener();
         //setting boarderlayout to panels
         wPanel.setLayout(new GridLayout(3, 1));
         ePanel.setLayout(new GridLayout(5, 1));
