@@ -19,7 +19,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
 import controller.Listener;
-import view.*;
 
 /**
  *
@@ -108,7 +107,7 @@ public class TransferFile {
         long miliOffset = 0;
         int sec = Integer.parseInt(FileMoverPanel.getFileMoverPanel().getOffset());
         miliOffset = (long) ((Math.pow(10, 3)) * sec);//convert sec to mili
-        curTime -= miliOffset;
+        curTime += miliOffset;
         return curTime;
     }
     /*return the date from a mili date*/

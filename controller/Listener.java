@@ -164,17 +164,25 @@ public class Listener implements ActionListener {
     }
 
     private void transferFiles(File choosedFiles[], ArrayList<TransferFile> filesInfo) throws IOException {
+        String toPath = target1Path , newName;
+        Path to = null, from;
         for (int i = 0; i < choosedFiles.length; i++) {//copy file to the destinations
-            for (String toPath : targetsPath) {
-                Path to = null, from;
-                from = Paths.get(srcPath + "/" + choosedFiles[i].getName());
-                String newName = filesInfo.get(i).getName() 
+            from = Paths.get(srcPath + "/" + choosedFiles[i].getName());
+            if(toPath != null) { 
+                newName = filesInfo.get(i).getName() 
                         + "_" + volume + 
                         "_" + getFileName(choosedFiles[i].getName());
                 if(fileType.length() == 0)//regular transfer
                     to = Paths.get(toPath + "/" + newName + getFileEnding(choosedFiles[i]));
                 else
                     to = Paths.get(toPath + "/" + newName + "." + fileType);
+                Files.copy(from, to);
+            }
+            toPath = target2Path;
+            if(toPath != null){//regular transfer
+                newName = getFileName(choosedFiles[i].getName());
+                to = Paths.get(toPath + "/" + newName + getFileEnding(choosedFiles[i]));
+                from = Paths.get(srcPath + "/" + choosedFiles[i].getName());
                 Files.copy(from, to);
             }
         }
@@ -222,7 +230,11 @@ public class Listener implements ActionListener {
         ArrayList<File> file2Transfer = new ArrayList<>();
 
         for (File file : files) {
-            file2Transfer.add(file);
+            if(fileType != null)//filtered by file type
+                if(file.getName().endsWith(fileType))
+                    file2Transfer.add(file);
+            else
+                file2Transfer.add(file);
         }
         File arrFile[] = new File[file2Transfer.size()];
         return file2Transfer.toArray(arrFile);

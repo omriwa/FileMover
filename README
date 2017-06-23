@@ -10,3 +10,4 @@ leave the file type empty
 4.filling the file type input will change all
 the files postfix that were selected to the input.
 5.filling the type input as- just the post fix- example:png
+6.filling the target-number produce a new folders destination.
