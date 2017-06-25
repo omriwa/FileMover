@@ -167,7 +167,7 @@ public class Listener implements ActionListener {
         String toPath = target1Path , newName;
         Path to = null, from;
         for (int i = 0; i < choosedFiles.length; i++) {//copy file to the destinations
-            from = Paths.get(srcPath + "/" + choosedFiles[i].getName());
+            from = Paths.get(choosedFiles[i].getAbsolutePath());
             if(toPath != null) { 
                 newName = filesInfo.get(i).getName() 
                         + "_" + volume + 
@@ -230,9 +230,10 @@ public class Listener implements ActionListener {
         ArrayList<File> file2Transfer = new ArrayList<>();
 
         for (File file : files) {
-            if(fileType != null)//filtered by file type
+            if(fileType != null){//filtered by file type
                 if(file.getName().endsWith(fileType))
                     file2Transfer.add(file);
+            }
             else
                 file2Transfer.add(file);
         }
