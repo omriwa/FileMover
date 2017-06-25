@@ -1,10 +1,15 @@
+package controller;
+
+
+
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package controller;
 
+
+import model.TransferFile;
 import view.FileMoverPanel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -22,8 +27,6 @@ import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
-import model.TransferFile;
-
 
 /**
  *
@@ -32,7 +35,7 @@ import model.TransferFile;
 public class Listener implements ActionListener {
 
     private JFileChooser directoryChooser;
-    private String srcPath, target1Path, target2Path, fileType, volume, folder1Name = "", folder2Name = "", offset;
+    private String srcPath, target1Path, target2Path , temp1Path, temp2Path, fileType, volume, folder1Name = "", folder2Name = "", offset;
     private ArrayList<String> targetsPath = null;
     private File files[];
     private boolean validSrc = false, validTar1 = false, validTar2 = false, validVol = false;
@@ -86,11 +89,11 @@ public class Listener implements ActionListener {
             if (isValidTransfer()) {//make transfer
                 try {
                     File choosedFiles[] = getFilesToTransfer(files);//get the files that need to be transfered
-                    TransferFile.initFileArrInfo(files);//
+                    TransferFile.initFileArrInfo(choosedFiles);//
                     setVolumeGui();//set the volume of files in gui
                     changeVol();//ask the user for change the volume
-                    int userResult = JOptionPane.showConfirmDialog(new JFrame(), "procced?");
                     updateDestination();
+                    int userResult = JOptionPane.showConfirmDialog(new JFrame(), "procced?");
                     setInput();//set the input
                     if (userResult == JOptionPane.OK_OPTION) {
                         createFolders();
@@ -164,7 +167,7 @@ public class Listener implements ActionListener {
     }
 
     private void transferFiles(File choosedFiles[], ArrayList<TransferFile> filesInfo) throws IOException {
-        String toPath = target1Path , newName;
+        String toPath = targetsPath.get(0) , newName;
         Path to = null, from;
         for (int i = 0; i < choosedFiles.length; i++) {//copy file to the destinations
             from = Paths.get(choosedFiles[i].getAbsolutePath());
@@ -178,7 +181,7 @@ public class Listener implements ActionListener {
                     to = Paths.get(toPath + "/" + newName + "." + fileType);
                 Files.copy(from, to);
             }
-            toPath = target2Path;
+            toPath = targetsPath.get(1);
             if(toPath != null){//regular transfer
                 newName = getFileName(choosedFiles[i].getName());
                 to = Paths.get(toPath + "/" + newName + getFileEnding(choosedFiles[i]));
@@ -201,27 +204,27 @@ public class Listener implements ActionListener {
     private void updateDestination() {
         FileMoverPanel panel = FileMoverPanel.getFileMoverPanel();
         //update the destination members in the listener
-        if (!folder1Name.equals(panel.getFolder1Name())) {
+        if (!folder1Name.equals(panel.getFolder1Name())) { 
             folder1Name = panel.getFolder1Name();
-            target1Path += "/" + panel.getFolder1Name();
             folderCreationFlags[0] = true;
         }
         else
             folderCreationFlags[0] = false;
-        if (!folder2Name.equals(panel.getFolder2Name())) {
+        if (!folder2Name.equals(panel.getFolder2Name())) { 
             folder2Name = panel.getFolder2Name();
-            target2Path += "/" + panel.getFolder2Name();
             folderCreationFlags[1] = true;
         }
         else
             folderCreationFlags[1] = false;
         //update gui targets
-        panel.setChosenTar1(target1Path);
-        panel.setChosenTar2(target2Path);
+        temp1Path = target1Path + "/" + folder1Name;
+        temp2Path = target2Path + "/" + folder2Name;
+        panel.setChosenTar1(temp1Path);
+        panel.setChosenTar2(temp2Path);
         //add to targetsPath
         targetsPath.clear();
-        targetsPath.add(target1Path);
-        targetsPath.add(target2Path);
+        targetsPath.add(temp1Path);
+        targetsPath.add(temp2Path);
     }
 
     /*select the files to transfer*/

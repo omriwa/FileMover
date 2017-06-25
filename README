@@ -11,3 +11,5 @@ leave the file type empty
 the files postfix that were selected to the input.
 5.filling the type input as- just the post fix- example:png
 6.filling the target-number produce a new folders destination.
+7.when you want to work with the same directory, if its source or 
+destinations, you should choose it again.
