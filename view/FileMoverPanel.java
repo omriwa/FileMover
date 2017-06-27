@@ -51,11 +51,11 @@ public class FileMoverPanel extends JPanel {
         offsetLbl = new JLabel("Offset:");
         chosenTrg1 = new JLabel("target1:");
         chosenTrg2 = new JLabel("target2:");
-        tar1Input = new JTextField();
-        tar2Input = new JTextField();
-        offsetInput = new JTextField();
-        volInput = new JTextField();
-        fTypeInput = new JTextField();
+        tar1Input = new JTextField("");
+        tar2Input = new JTextField("");
+        offsetInput = new JTextField("");
+        volInput = new JTextField("");
+        fTypeInput = new JTextField("");
         Listener listener = new Listener();
         //setting boarderlayout to panels
         wPanel.setLayout(new GridLayout(3, 1));
@@ -154,5 +154,17 @@ public class FileMoverPanel extends JPanel {
 
     public void setVolumeInput(String size) {
         volInput.setText(size);
+    }
+    
+    public void clearInputs(){
+        volInput.setText("");
+        offsetInput.setText("");
+        tar1Input.setText("");
+        tar2Input.setText("");
+        fTypeInput.setText("");
+        chosenSrc.setText("Source:");
+        chosenTrg1.setText("Target1:");
+        chosenTrg2.setText("Target2:");
+
     }
 }

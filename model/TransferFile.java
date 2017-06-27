@@ -90,9 +90,9 @@ public class TransferFile {
             //handle
         }
     }
-    /*get String of the creation date of the file as yyyyMMdd-hhmm*/
-    private static String getFileNameFormat(Date date) {
-        SimpleDateFormat formater = new SimpleDateFormat("yyyyMMdd-hhmm");
+    /*get String of the creation date of the file as yyyyMMdd-HHmm*/
+    public static String getFileNameFormat(Date date) {
+        SimpleDateFormat formater = new SimpleDateFormat("yyyyMMdd-HHmm");
         return formater.format(date);
     }
 
@@ -119,7 +119,7 @@ public class TransferFile {
     }
     /*return the date from a mili date*/
     private static Date getCreationTime(Long date) {
-        DateFormat df = new SimpleDateFormat("MM/dd/yyyy hh:mm:ss");
+        DateFormat df = new SimpleDateFormat("MM/dd/yyyy HH:mm:ss");
         String dateCreated = df.format(date);
         return new Date(dateCreated);
     }

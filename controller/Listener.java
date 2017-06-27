@@ -1,14 +1,10 @@
 package controller;
 
-
-
 /*
  * To change this license header, choose License Headers in Project Properties.
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-
-
 import model.TransferFile;
 import view.FileMoverPanel;
 import java.awt.event.ActionEvent;
@@ -35,19 +31,16 @@ import javax.swing.JOptionPane;
 public class Listener implements ActionListener {
 
     private JFileChooser directoryChooser;
-    private String srcPath, target1Path, target2Path , temp1Path, temp2Path, fileType, volume, folder1Name = "", folder2Name = "", offset;
+    private String srcPath, target1Path, target2Path, temp1Path, temp2Path, fileType, volume, offset;
     private ArrayList<String> targetsPath = null;
     private File files[];
     private boolean validSrc = false, validTar1 = false, validTar2 = false, validVol = false;
     private ArrayList<TransferFile> transferFilesInfo = null;
-    private final boolean folderCreationFlags [] = new boolean[2];
 
     public Listener() {
         directoryChooser = new JFileChooser();
         targetsPath = new ArrayList<>();
         transferFilesInfo = new ArrayList<TransferFile>();
-        folderCreationFlags [0] = false;
-        folderCreationFlags [1] = false;
     }
 
     @Override
@@ -88,20 +81,22 @@ public class Listener implements ActionListener {
             //validate user chooses
             if (isValidTransfer()) {//make transfer
                 try {
+                    setVolume();//ask the user for change the volume
+                    setInput();//set the input
                     File choosedFiles[] = getFilesToTransfer(files);//get the files that need to be transfered
                     TransferFile.initFileArrInfo(choosedFiles);//
                     setVolumeGui();//set the volume of files in gui
-                    changeVol();//ask the user for change the volume
                     updateDestination();
                     int userResult = JOptionPane.showConfirmDialog(new JFrame(), "procced?");
-                    setInput();//set the input
                     if (userResult == JOptionPane.OK_OPTION) {
                         createFolders();
                         transferFiles(choosedFiles, TransferFile.getTransferFilesInfo());
                         setFilesDate(TransferFile.getTransferFilesInfo());
                         userResult = JOptionPane.showConfirmDialog(new JFrame(), "Transfered successfuly , delete origin files?");
-                        if(userResult == JOptionPane.OK_OPTION)
+                        if (userResult == JOptionPane.OK_OPTION) {
                             deletOriginFiles();
+                        }
+                        clearUserInputs();
                     }
                 } catch (Exception ez) {
 
@@ -167,23 +162,22 @@ public class Listener implements ActionListener {
     }
 
     private void transferFiles(File choosedFiles[], ArrayList<TransferFile> filesInfo) throws IOException {
-        String toPath = targetsPath.get(0) , newName;
+        String toPath , newName;
         Path to = null, from;
         for (int i = 0; i < choosedFiles.length; i++) {//copy file to the destinations
+            toPath = targetsPath.get(0);
             from = Paths.get(choosedFiles[i].getAbsolutePath());
-            if(toPath != null) { 
-                newName = filesInfo.get(i).getName() 
-                        + "_" + volume + 
-                        "_" + getFileName(choosedFiles[i].getName());
-                if(fileType.length() == 0)//regular transfer
-                    to = Paths.get(toPath + "/" + newName + getFileEnding(choosedFiles[i]));
-                else
-                    to = Paths.get(toPath + "/" + newName + "." + fileType);
+            if (toPath != null) {
+                newName = filesInfo.get(i).getName()
+                        + "_" + volume
+                        + "_" + getFileName(choosedFiles[i].getName());
+                to = Paths.get(toPath + "/" + newName + getFileEnding(choosedFiles[i]));
                 Files.copy(from, to);
             }
+
             toPath = targetsPath.get(1);
-            if(toPath != null){//regular transfer
-                newName = getFileName(choosedFiles[i].getName());
+            if (toPath != null) {//regular transfer
+                newName = TransferFile.getFileNameFormat(filesInfo.get(i).getCreateTime()) + "_" + getFileName(choosedFiles[i].getName());
                 to = Paths.get(toPath + "/" + newName + getFileEnding(choosedFiles[i]));
                 from = Paths.get(srcPath + "/" + choosedFiles[i].getName());
                 Files.copy(from, to);
@@ -193,34 +187,22 @@ public class Listener implements ActionListener {
 
     private void createFolders() {
         for (int i = 0; i < targetsPath.size(); i++) {
-            if(folderCreationFlags[i]){
-                File f = new File(targetsPath.get(i));
-                f.mkdir();
-            }
+            File f = new File(targetsPath.get(i));
+            f.mkdir();
         }
     }
 
     /*update destination in gui*/
     private void updateDestination() {
         FileMoverPanel panel = FileMoverPanel.getFileMoverPanel();
-        //update the destination members in the listener
-        if (!folder1Name.equals(panel.getFolder1Name())) { 
-            folder1Name = panel.getFolder1Name();
-            folderCreationFlags[0] = true;
-        }
-        else
-            folderCreationFlags[0] = false;
-        if (!folder2Name.equals(panel.getFolder2Name())) { 
-            folder2Name = panel.getFolder2Name();
-            folderCreationFlags[1] = true;
-        }
-        else
-            folderCreationFlags[1] = false;
+
         //update gui targets
-        temp1Path = target1Path + "/" + folder1Name;
-        temp2Path = target2Path + "/" + folder2Name;
-        panel.setChosenTar1(temp1Path);
-        panel.setChosenTar2(temp2Path);
+        temp1Path = target1Path + "/" + panel.getFolder1Name();
+        temp2Path = target2Path + "/" + panel.getFolder2Name();
+        if(target1Path != null)
+            panel.setChosenTar1(temp1Path);
+        if(target2Path != null)
+            panel.setChosenTar2(temp2Path);
         //add to targetsPath
         targetsPath.clear();
         targetsPath.add(temp1Path);
@@ -233,12 +215,13 @@ public class Listener implements ActionListener {
         ArrayList<File> file2Transfer = new ArrayList<>();
 
         for (File file : files) {
-            if(fileType != null){//filtered by file type
-                if(file.getName().endsWith(fileType))
+            if (fileType.length() > 0) {//filtered by file type
+                if (file.getName().endsWith(fileType)) {
                     file2Transfer.add(file);
-            }
-            else
+                }
+            } else {
                 file2Transfer.add(file);
+            }
         }
         File arrFile[] = new File[file2Transfer.size()];
         return file2Transfer.toArray(arrFile);
@@ -253,12 +236,12 @@ public class Listener implements ActionListener {
     }
 
     /*set the volume of the source in gui*/
-    private void setVolumeGui() {      
+    private void setVolumeGui() {
         FileMoverPanel.getFileMoverPanel().setVolumeInput(volume);
     }
 
     /*change the input of the volume*/
-    private void changeVol() {
+    private void setVolume() {
         String volume = "";
         volume = JOptionPane.showInputDialog(new JFrame(), "for change the volume enter a volume else press ok");
         if (!volume.isEmpty()) {
@@ -297,23 +280,35 @@ public class Listener implements ActionListener {
             }
         }
     }
-    
-    private void deletOriginFiles(){
-        for(int i = 0 ; i < files.length ; i++)
+
+    private void deletOriginFiles() {
+        for (int i = 0; i < files.length; i++) {
             try {
                 Files.delete(Paths.get(files[i].getAbsolutePath()));
             } catch (IOException ex) {
                 Logger.getLogger(Listener.class.getName()).log(Level.SEVERE, null, ex);
             }
+        }
     }
-    
-    private String getFileName(String name){
+
+    private String getFileName(String name) {
         String output = "";
-        for(int i = 0 ; i < name.length() ; i++)
-            if(name.charAt(i) == '.'){
+        for (int i = 0; i < name.length(); i++) {
+            if (name.charAt(i) == '.') {
                 output = name.substring(0, i);
                 break;
             }
+        }
         return output;
+    }
+
+    /*clear user inputs and refresh the paths*/
+    private void clearUserInputs() {
+        FileMoverPanel.getFileMoverPanel().clearInputs();//clear inputs in gui
+        srcPath = "";
+        target1Path = "";
+        target2Path = "";
+        targetsPath.clear();
+        files = null;
     }
 }
