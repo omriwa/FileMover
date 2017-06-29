@@ -76,7 +76,7 @@ public class TransferFile {
         //init the the file name
         for(TransferFile fileInfo : transferFilesInfo){
             Date d = fileInfo.getCreateTime();
-            fileInfo.setName(getFileNameFormat(d));
+            fileInfo.setName(getFileNameFormatHour(d));
         }
     }
 
@@ -93,9 +93,14 @@ public class TransferFile {
         }
     }
     /*get String of the creation date of the file as yyyyMMdd-HHmm*/
-    public static String getFileNameFormat(Date date) {
+    public static String getFileNameFormatHour(Date date) {
         SimpleDateFormat formater = new SimpleDateFormat("yyyyMMdd-HHmm");
         return formater.format(date);
+    }
+    
+    public static String getFileNameFormatDay(Date d){
+        SimpleDateFormat formater = new SimpleDateFormat("yyyyMMdd");
+        return formater.format(d);
     }
 
     private static Date getFileCreateTime(String url) throws IOException {

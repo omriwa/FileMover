@@ -20,6 +20,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import javafx.embed.swing.JFXPanel;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JOptionPane;
@@ -142,6 +143,8 @@ public class Listener implements ActionListener {
         }
         //check offset
         if (!notEmptyAndNum(fileMoverPanel.getOffset())) {
+            JOptionPane.showMessageDialog(new JFrame(), 
+            "intiliaze the offset with a number, if you dont want an offset enter 0");
             return false;
         }
 
@@ -177,7 +180,7 @@ public class Listener implements ActionListener {
 
             toPath = targetsPath.get(1);
             if (toPath != null) {//regular transfer
-                newName = TransferFile.getFileNameFormat(filesInfo.get(i).getCreateTime()) + "_" + getFileName(choosedFiles[i].getName());
+                newName = TransferFile.getFileNameFormatDay(filesInfo.get(i).getCreateTime()) + "_" + getFileName(choosedFiles[i].getName());
                 to = Paths.get(toPath + "/" + newName + getFileEnding(choosedFiles[i]));
                 from = Paths.get(srcPath + "/" + choosedFiles[i].getName());
                 Files.copy(from, to);
